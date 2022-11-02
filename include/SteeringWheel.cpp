@@ -12,8 +12,6 @@ void fallingSteeringPWMPulse() {
 
   rawSteeringInputPWM = timeDifference;
 
-  steeringAngle = map(rawSteeringInputPWM, 1108, 1836, -90, 90);
-
   if (rawSteeringInputPWM < 1460 || rawSteeringInputPWM > 1480) {
     steeringIsManual = true;
   } else {
