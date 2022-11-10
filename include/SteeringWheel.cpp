@@ -8,7 +8,7 @@
 
 void fallingSteeringPWMPulse() {
   int currentTime = micros();
-  int timeDifference = currentTime - previousTime;
+  int timeDifference = currentTime - steeringPreviousTime;
 
   rawSteeringInputPWM = timeDifference;
 
@@ -18,31 +18,28 @@ void fallingSteeringPWMPulse() {
     steeringIsManual = false;
   }
 
-  Serial.println(steeringIsManual);
-  attachInterrupt(interruptPin, risingSteeringPWMPulse, RISING);
+  attachInterrupt(steeringInterruptPin, risingSteeringPWMPulse, RISING);
 }
 
 void risingSteeringPWMPulse() {
-  previousTime = micros();
-  attachInterrupt(interruptPin, fallingSteeringPWMPulse, FALLING);
+  steeringPreviousTime = micros();
+  attachInterrupt(steeringInterruptPin, fallingSteeringPWMPulse, FALLING);
 }
 
 void setSteeringAngle(int angle) {
   steeringAngle = angle;
 }
 
-void setSteeringInputPin(int pwmPin) {
-  PWM_PIN = pwmPin;
+SteeringWheel::SteeringWheel(int pwmPinInput, int pwmPinOutput) {
+  Serial.print("SteeringWheel constructor called\n");
 
-  interruptPin = digitalPinToInterrupt(PWM_PIN);
-  attachInterrupt(interruptPin, risingSteeringPWMPulse, RISING);
+  STEERING_PWM_PIN_INPUT = pwmPinInput;
+  STEERING_PWM_PIN_OUTPUT = pwmPinOutput;
 
-  return;
-}
+  steeringInterruptPin = digitalPinToInterrupt(STEERING_PWM_PIN_INPUT);
+  attachInterrupt(steeringInterruptPin, risingSteeringPWMPulse, RISING);
 
-SteeringWheel::SteeringWheel(int pwmPin) {
-  steeringOutputPin = pwmPin;
-  steeringServo.attach(steeringOutputPin);
+  steeringServo.attach(STEERING_PWM_PIN_OUTPUT);
   steeringServo.write(0);
 }
 
