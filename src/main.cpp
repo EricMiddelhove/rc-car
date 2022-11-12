@@ -6,7 +6,7 @@
 
 SteeringWheel* steeringWheel = NULL;
 AcceleratorPedal* acceleratorPedal = NULL;
-Logger* logger;
+Logger* logger = NULL;
 
 void setup() {
   // put your setup code here, to run once:
