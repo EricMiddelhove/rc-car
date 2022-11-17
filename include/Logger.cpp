@@ -7,9 +7,9 @@ Logger::Logger() {
 
   Serial.print("Initializing SD card...");
 
-  int successful = SD.begin(53);
+  bool successful = SD.begin(53);
 
-  if (successful == 0) {
+  if (!successful) {
     Serial.println("Card Mount Failed");
     return;
   }

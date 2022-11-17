@@ -8,7 +8,7 @@
 
 void fallingSteeringPWMPulse() {
   int currentTime = micros();
-  int timeDifference = currentTime - steeringPreviousTime;
+  short int timeDifference = currentTime - steeringPreviousTime;
 
   rawSteeringInputPWM = timeDifference;
 
@@ -45,7 +45,7 @@ SteeringWheel::SteeringWheel(int pwmPinInput, int pwmPinOutput) {
 
 void SteeringWheel::steer(int percent) {
   // -100 (FULL LEFT) to 100 (FULL RIGHT)
-  int steeringPwmOutput = map(percent, -100, 100, STEERING_FULL_LEFT, STEERING_FULL_RIGHT);
+  short int steeringPwmOutput = map(percent, -100, 100, STEERING_FULL_LEFT, STEERING_FULL_RIGHT);
 
   steeringServo.write(steeringPwmOutput);
 }

@@ -4,7 +4,7 @@
 // Might conflict with interrupt of steering reading, when pulse happens at the same time
 void fallingAcceleratorPWMPulse() {
   int currentTime = micros();
-  int timeDifference = currentTime - acceleratorPreviousTime;
+  short int timeDifference = currentTime - acceleratorPreviousTime;
 
   rawAcceleratorInputPWM = timeDifference;
 

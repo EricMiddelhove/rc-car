@@ -7,25 +7,25 @@
 void fallingSteeringPWMPulse();
 void risingSteeringPWMPulse();
 
-const int RAW_STEERING_FULL_LEFT = 1836;
-const int RAW_STEERING_FULL_RIGHT = 1108;
+const short int RAW_STEERING_FULL_LEFT = 1836;
+const short int RAW_STEERING_FULL_RIGHT = 1108;
 
-const int STEERING_FULL_LEFT = 200;
-const int STEERING_FULL_RIGHT = 55;
-const int STEERING_CENTER = 90;
+const short int STEERING_FULL_LEFT = 200;
+const short int STEERING_FULL_RIGHT = 55;
+const short int STEERING_CENTER = 90;
 
-int STEERING_PWM_PIN_INPUT;
-int STEERING_PWM_PIN_OUTPUT;
+byte STEERING_PWM_PIN_INPUT;
+byte STEERING_PWM_PIN_OUTPUT;
 
 int steeringPreviousTime;
-int steeringInterruptPin;
-int rawSteeringInputPWM;
+byte steeringInterruptPin;
+short int rawSteeringInputPWM;
 
 bool steeringIsManual;
 
-int steeringAngle;
+byte steeringAngle;
 
-int steeringManualPWMInput;
+short int steeringManualPWMInput;
 
 class SteeringWheel {
  public:

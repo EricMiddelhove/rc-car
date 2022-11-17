@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 #include "AcceleratorPedal.cpp"
+#include "Gyroscope.cpp"
 #include "Logger.cpp"
 #include "SteeringWheel.cpp"
 
