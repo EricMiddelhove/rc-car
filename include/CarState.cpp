@@ -40,3 +40,24 @@ CarState::CarState(Gyro* gyro) {
 CarState::CarState() {
   // TODO: Adjust Values
 }
+
+String CarState::getCSVLine() {
+  String csvLine = "";
+
+  csvLine += String(this->xAcc) + ",";
+  csvLine += String(this->zAcc) + ",";
+  csvLine += String(this->yAcc) + ",";
+
+  csvLine += String(this->xGyro) + ",";
+  csvLine += String(this->yGyro) + ",";
+  csvLine += String(this->zGyro) + ",";
+
+  csvLine += String(this->course) + ",";
+  csvLine += String(this->targetCourse) + ",";
+
+  csvLine += String(this->steeringAngle) + ",";
+  csvLine += String(this->acceleratorPercent);
+  csvLine += "\n";
+
+  return csvLine;
+}

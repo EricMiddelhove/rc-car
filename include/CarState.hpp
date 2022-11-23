@@ -23,6 +23,8 @@ class CarState {
   CarState(Gyro* gyro);
   CarState();
 
+  String getCSVLine();
+
  private:
   short zeroCourseGyroValue;
 };
