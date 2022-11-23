@@ -1,3 +1,6 @@
+#ifndef Gyroscope_hpp
+#define Gyroscope_hpp
+
 #include <Arduino.h>
 #include <Wire.h>
 
@@ -23,3 +26,5 @@ class Gyro {
 
   void wake();
 };
+
+#endif

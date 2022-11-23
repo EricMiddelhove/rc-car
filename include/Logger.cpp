@@ -1,7 +1,5 @@
 #include "Logger.hpp"
 
-#include "SPI.h"
-
 Logger::Logger() {
   Serial.begin(9600);
 
@@ -19,6 +17,11 @@ Logger::Logger() {
   Serial.println("Logger Initialized");
 }
 
+Logger::~Logger() {
+  Logger::logFile.close();
+  Serial.println("Logger closed");
+}
+
 void Logger::log(String message) {
   if (Logger::logFile) {
     Logger::logFile.println(message);
@@ -28,10 +31,4 @@ void Logger::log(String message) {
     Serial.println("Error opening log file");
   }
   return;
-}
-
-void deleteLogger(Logger* logger) {
-  logger->logFile.close();
-  Serial.println("Logger closed");
-  delete logger;
 }

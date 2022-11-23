@@ -7,11 +7,10 @@
 class Logger {
  public:
   Logger();
+  ~Logger();
   void log(String message);
 
   File logFile;
 };
-
-void deleteLogger(Logger* logger);
 
 #endif

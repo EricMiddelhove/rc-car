@@ -6,12 +6,12 @@ void fallingAcceleratorPWMPulse();
 void risingAcceleratorPWMPulse();
 
 // TODO: Adjust Values
-const short int RAW_FULL_ACCELERATOR = 2020;
-const short int RAW_NO_ACCELERATOR = 1500;
-const short int RAW_BRAKE = 980;
+const short RAW_FULL_ACCELERATOR = 2020;
+const short RAW_NO_ACCELERATOR = 1500;
+const short RAW_BRAKE = 980;
 
-short int ACCELERATOR_PWM_PIN_INPUT;
-short int ACCELERATOR_PWM_PIN_OUTPUT;
+short ACCELERATOR_PWM_PIN_INPUT;
+short ACCELERATOR_PWM_PIN_OUTPUT;
 int acceleratorPreviousTime;
 byte acceleratorInterruptPin;
 byte rawAcceleratorInputPWM;
