@@ -1,20 +1,35 @@
 
 #include "AcceleratorPedal.hpp"
 
+int accSampleNumber = 0;
+int accSampleSum = 0;
+int lollo = 0;
 // Might conflict with interrupt of steering reading, when pulse happens at the same time
 void fallingAcceleratorPWMPulse() {
   int currentTime = micros();
-  short int timeDifference = currentTime - acceleratorPreviousTime;
-
-  rawAcceleratorInputPWM = timeDifference;
-
-  if (rawAcceleratorInputPWM < 1460 || rawAcceleratorInputPWM > 1480) {
+  int pulseWidth = currentTime - acceleratorPreviousTime;
+  lollo = pulseWidth;
+  if (pulseWidth < RAW_NO_ACCELERATOR - 10 || pulseWidth > RAW_NO_ACCELERATOR + 10) {
     acceleratorIsManual = true;
   } else {
     acceleratorIsManual = false;
   }
 
-  attachInterrupt(acceleratorInterruptPin, risingAcceleratorPWMPulse, RISING);
+  accSampleSum += pulseWidth;
+  accSampleNumber++;
+
+  if (accSampleNumber >= ACC_INPUT_SAMPLE_SIZE) {
+    rawAcceleratorInputPWM = accSampleSum / ACC_INPUT_SAMPLE_SIZE;
+    accSampleNumber = 0;
+    accSampleSum = 0;
+
+    attachInterrupt(acceleratorInterruptPin, risingAcceleratorPWMPulse, RISING);
+    return;
+
+  } else {
+    attachInterrupt(acceleratorInterruptPin, risingAcceleratorPWMPulse, RISING);
+    return;
+  }
 }
 
 void risingAcceleratorPWMPulse() {
@@ -25,8 +40,6 @@ void risingAcceleratorPWMPulse() {
 AcceleratorPedal::AcceleratorPedal(int pwmPinInput, int pwmPinOutput) {
   ACCELERATOR_PWM_PIN_INPUT = pwmPinInput;
   ACCELERATOR_PWM_PIN_OUTPUT = pwmPinOutput;
-  Serial.print("ACCELERATOR_PWM_PIN_INPUT: " + String(ACCELERATOR_PWM_PIN_INPUT) + "\t");
-  Serial.print("AcceleratorPedal constructor called\n");
   pinMode(ACCELERATOR_PWM_PIN_INPUT, INPUT);
   pinMode(ACCELERATOR_PWM_PIN_OUTPUT, OUTPUT);
 
@@ -35,13 +48,26 @@ AcceleratorPedal::AcceleratorPedal(int pwmPinInput, int pwmPinOutput) {
 }
 
 void AcceleratorPedal::accelerate(int percent) {
+  // -1 (BRAKE) to 100 (FULL ACCELERATOR)
+  acceleratorPercent = percent;
+
   int outputValue;
 
   if (percent < 0) {
     outputValue = RAW_BRAKE;
   } else {
-    outputValue = map(percent, 0, 100, RAW_NO_ACCELERATOR, RAW_FULL_ACCELERATOR);
+    outputValue = map(acceleratorPercent, 0, 100, RAW_NO_ACCELERATOR, RAW_FULL_ACCELERATOR);
   }
 
   analogWrite(acceleratorOutputPin, outputValue);
+}
+
+int AcceleratorPedal::getAcceleratorPercent() {
+  if (acceleratorIsManual) {
+    acceleratorPercent = map(rawAcceleratorInputPWM, RAW_NO_ACCELERATOR, RAW_FULL_ACCELERATOR, 0, 100);
+  } else {
+    acceleratorPercent = 0;
+  }
+
+  return acceleratorPercent;
 }

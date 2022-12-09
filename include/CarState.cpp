@@ -2,7 +2,7 @@
 
 #include "Gyroscope.hpp"
 
-CarState::CarState(Gyro* gyro, short targetCourse) {
+CarState::CarState(Gyro* gyro, SteeringWheel* steeringwheel, AcceleratorPedal* acceleratorpedal) {
   short* gyroData = gyro->getGyroData();
   short* accData = gyro->getAccelerometerData();
 
@@ -16,6 +16,9 @@ CarState::CarState(Gyro* gyro, short targetCourse) {
 
   this->targetCourse = targetCourse;
   this->zeroCourseGyroValue = this->zGyro;
+
+  this->steeringPercent = steeringwheel->getSteeringPercent();
+  this->acceleratorPercent = acceleratorpedal->getAcceleratorPercent();
 
   this->course = 0;
 }
@@ -43,7 +46,6 @@ CarState::CarState() {
 
 String CarState::getCSVLine() {
   String csvLine = "";
-
   csvLine += String(this->xAcc) + ",";
   csvLine += String(this->zAcc) + ",";
   csvLine += String(this->yAcc) + ",";
@@ -55,9 +57,8 @@ String CarState::getCSVLine() {
   csvLine += String(this->course) + ",";
   csvLine += String(this->targetCourse) + ",";
 
-  csvLine += String(this->steeringAngle) + ",";
+  csvLine += String(this->steeringPercent) + ",";
   csvLine += String(this->acceleratorPercent);
-  csvLine += "\n";
 
   return csvLine;
 }

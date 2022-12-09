@@ -5,48 +5,58 @@
 #endif
 
 Logger::Logger() {
-#if (DEBUG_MODE > 1)
+  Serial.begin(1200);
+  Serial.println("Initializing SD card...");
 
-  Serial.begin(9600);
-  Serial.print("Initializing SD card...");
-#endif
-
-#if (DEBUG_MODE > 1)
   bool successful = SD.begin(53);
   if (!successful) {
     Serial.println("Card Mount Failed");
     return;
+  } else {
+    Serial.println("Card Mount Successful");
   }
-#else
-  SD.begin(53);
-#endif
 
-  Logger::logFile = SD.open("log.txt", FILE_WRITE);
+  int logcount = 0;
 
-#if (DEBUG_MODE > 1)
-  Serial.println("Logger Initialized");
-#endif
+  bool fileExists = true;
+  String filename = "";
+
+  while (fileExists) {
+    filename = "log";
+    filename.concat(logcount);
+    filename.concat(".txt");
+
+    Serial.print("Checking file: ");
+    Serial.print(filename);
+    Serial.print("\n");
+    delay(100);
+    fileExists = SD.exists(filename);
+
+    logcount++;
+  }
+  delay(500);
+  Logger::logFile = SD.open(filename, FILE_WRITE);
+  this->log("Logger Initialized");
 }
 
 Logger::~Logger() {
+  this->log("Log Ending");
   Logger::logFile.close();
-#if (DEBUG_MODE > 1)
+
   Serial.println("Logger closed");
-#endif
 }
 
 void Logger::log(String message) {
   if (Logger::logFile) {
     Logger::logFile.println(message);
     Logger::logFile.flush();
-#if (DEBUG_MODE > 1)
-    Serial.println(message);
-#endif
 
+    Serial.println(message);
   } else {
-#if (DEBUG_MODE > 1)
-    Serial.println("Error opening log file");
-#endif
+    Serial.print("NO SD CARD: ");
+    Serial.print(message);
+    Serial.print("\n");
   }
+  delay(10);
   return;
 }

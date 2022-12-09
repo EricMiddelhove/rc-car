@@ -6,19 +6,33 @@
 #include "Arduino.h"
 #include "Servo.h"
 
+int sampleNumber = 0;
+int sampleSum = 0;
 void fallingSteeringPWMPulse() {
   int currentTime = micros();
-  short int timeDifference = currentTime - steeringPreviousTime;
+  int pulseWidth = currentTime - steeringPreviousTime;
 
-  rawSteeringInputPWM = timeDifference;
-
-  if (rawSteeringInputPWM < 1460 || rawSteeringInputPWM > 1480) {
+  if (pulseWidth < 1460 || pulseWidth > 1480) {
     steeringIsManual = true;
   } else {
     steeringIsManual = false;
   }
 
-  attachInterrupt(steeringInterruptPin, risingSteeringPWMPulse, RISING);
+  sampleSum += pulseWidth;
+  sampleNumber++;
+
+  if (sampleNumber >= INPUT_SAMPLE_SIZE) {
+    rawSteeringInputPWM = sampleSum / INPUT_SAMPLE_SIZE;
+    sampleNumber = 0;
+    sampleSum = 0;
+
+    attachInterrupt(steeringInterruptPin, risingSteeringPWMPulse, RISING);
+    return;
+
+  } else {
+    attachInterrupt(steeringInterruptPin, risingSteeringPWMPulse, RISING);
+    return;
+  }
 }
 
 void risingSteeringPWMPulse() {
@@ -26,13 +40,7 @@ void risingSteeringPWMPulse() {
   attachInterrupt(steeringInterruptPin, fallingSteeringPWMPulse, FALLING);
 }
 
-void setSteeringAngle(int angle) {
-  steeringAngle = angle;
-}
-
 SteeringWheel::SteeringWheel(int pwmPinInput, int pwmPinOutput) {
-  Serial.print("SteeringWheel constructor called\n");
-
   STEERING_PWM_PIN_INPUT = pwmPinInput;
   STEERING_PWM_PIN_OUTPUT = pwmPinOutput;
 
@@ -40,14 +48,27 @@ SteeringWheel::SteeringWheel(int pwmPinInput, int pwmPinOutput) {
   attachInterrupt(steeringInterruptPin, risingSteeringPWMPulse, RISING);
 
   steeringServo.attach(STEERING_PWM_PIN_OUTPUT);
-  steeringServo.write(0);
+  this->steer(0);
 }
 
 void SteeringWheel::steer(int percent) {
-  // -100 (FULL LEFT) to 100 (FULL RIGHT)
-  short int steeringPwmOutput = map(percent, -100, 100, STEERING_FULL_LEFT, STEERING_FULL_RIGHT);
+  // -100 (FULL RIGHT) to 100 (FULL LEFT)
+
+  steeringPercent = percent;
+
+  short int steeringPwmOutput = map(steeringPercent, -100, 100, RAW_STEERING_FULL_RIGHT, RAW_STEERING_FULL_LEFT);
 
   steeringServo.write(steeringPwmOutput);
+}
+
+int SteeringWheel::getSteeringPercent() {
+  if (steeringIsManual) {
+    steeringPercent = map(rawSteeringInputPWM, RAW_STEERING_FULL_LEFT, RAW_STEERING_FULL_RIGHT, -100, 100);
+  } else {
+    // TODO: AI Steering
+    steeringPercent = 0;
+  }
+  return -steeringPercent;
 }
 
 #endif

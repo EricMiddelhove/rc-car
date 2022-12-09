@@ -1,8 +1,10 @@
 #ifndef CarState_hpp
 #define CarState_hpp
 
+#include "AcceleratorPedal.hpp"
 #include "Arduino.h"
 #include "Gyroscope.hpp"
+#include "SteeringWheel.hpp"
 
 class CarState {
  public:
@@ -13,13 +15,13 @@ class CarState {
   short yGyro;
   short zGyro;
 
-  byte steeringAngle;
-  byte acceleratorPercent;
+  int steeringPercent;
+  int acceleratorPercent;
 
   short course;
   short targetCourse;
 
-  CarState(Gyro* gyro, short targetCourse);
+  CarState(Gyro* gyro, SteeringWheel* steeringwheel, AcceleratorPedal* acceleratorpedal);
   CarState(Gyro* gyro);
   CarState();
 
