@@ -2,6 +2,8 @@
 #define AcceleratorPedal_hpp
 
 #include "Arduino.h"
+#include "Servo.h"
+
 void fallingAcceleratorPWMPulse();
 void risingAcceleratorPWMPulse();
 
@@ -26,12 +28,12 @@ void risingAcceleratorPWMPulse();
 
 class AcceleratorPedal {
  public:
-  byte acceleratorOutputPin;
   AcceleratorPedal(int pwmPinInput, int pwmPinOutput);
   void accelerate(int percent);
   int getAcceleratorPercent();
 
  private:
-  int8_t acceleratorPercent;
+  Servo esc;
+  int acceleratorPercent;
 };
 #endif

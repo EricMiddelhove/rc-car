@@ -1,6 +1,8 @@
 
 #include "AcceleratorPedal.hpp"
 
+#include "Servo.h"
+
 int accSampleNumber = 0;
 int accSampleSum = 0;
 int lollo = 0;
@@ -45,6 +47,8 @@ AcceleratorPedal::AcceleratorPedal(int pwmPinInput, int pwmPinOutput) {
 
   acceleratorInterruptPin = digitalPinToInterrupt(ACCELERATOR_PWM_PIN_INPUT);
   attachInterrupt(acceleratorInterruptPin, risingAcceleratorPWMPulse, RISING);
+
+  esc.attach(ACCELERATOR_PWM_PIN_OUTPUT);
 }
 
 void AcceleratorPedal::accelerate(int percent) {
@@ -53,13 +57,15 @@ void AcceleratorPedal::accelerate(int percent) {
 
   int outputValue;
 
-  if (percent < 0) {
+  if (percent < -20) {
     outputValue = RAW_BRAKE;
   } else {
     outputValue = map(acceleratorPercent, 0, 100, RAW_NO_ACCELERATOR, RAW_FULL_ACCELERATOR);
   }
 
-  analogWrite(acceleratorOutputPin, outputValue);
+  // Serial.println(outputValue);
+
+  esc.write(outputValue);
 }
 
 int AcceleratorPedal::getAcceleratorPercent() {

@@ -1,26 +1,20 @@
 #include <Arduino.h>
 
-#define DEBUG_SD_ONLY 1
-#define DEBUG_FULL 2
-#define DEBUG_OFF 0
-
-#define DEBUG_MODE DEBUG_FULL
-
 #include "AcceleratorPedal.cpp"
 #include "CarState.cpp"
 #include "Gyroscope.cpp"
+#include "Logger.cpp"
+#include "SPI.h"
 #include "SteeringWheel.cpp"
 
-#if DEBUG_MODE > 0
-#include "Logger.cpp"
 Logger* logger = NULL;
-#endif
 
 SteeringWheel* steeringWheel = NULL;
 AcceleratorPedal* acceleratorPedal = NULL;
 Gyro* gyro = NULL;
 
 void setup() {
+  analogWrite(10, RAW_NO_ACCELERATOR);
 // put your setup code here, to run once:
 #if (DEBUG_MODE > 1)
 #endif
@@ -53,19 +47,29 @@ void setup() {
   delay(3000);
 
   while (true) {
+    if (logger->errorFlag) {
+      break;
+    }
+
     CarState carState(gyro, steeringWheel, acceleratorPedal);
 
-    int steeringPercent = steeringWheel->getSteeringPercent();
+    // int steeringPercent = steeringWheel->getSteeringPercent();
     int accelerationPercent = acceleratorPedal->getAcceleratorPercent();
+
+    // steeringWheel->steer(steeringPercent);
+    acceleratorPedal->accelerate(accelerationPercent);
 
     logger->log(carState.getCSVLine());
   }
+  SPI.end();
+  pinMode(13, OUTPUT);
+  steeringWheel->steer(0);
+  acceleratorPedal->accelerate(0);
 }
 
 void loop() {
-  steeringWheel->steer(0);
-  acceleratorPedal->accelerate(0);
-
-  // Serial.print("Steering: " + String(rawSteeringInputPWM) + "\t");
-  // Serial.print("Acceleration: " + String(rawAcceleratorInputPWM) + "\n");
+  digitalWrite(13, HIGH);
+  delay(500);
+  digitalWrite(13, LOW);
+  delay(500);
 }

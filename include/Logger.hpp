@@ -6,6 +6,7 @@
 
 class Logger {
  public:
+  bool errorFlag = false;
   Logger();
   ~Logger();
   void log(String message);
