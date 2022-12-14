@@ -23,11 +23,11 @@ void setup() {
 
   SteeringWheel sw(2, 9);
   steeringWheel = &sw;
-  logger->log("Steering Wheel Initialized");
+  Serial.println("Steering Wheel Initialized");
 
-  AcceleratorPedal ap(3, 10);
+  AcceleratorPedal ap(3, 10, 100);
   acceleratorPedal = &ap;
-  logger->log("Accelerator Pedal Initialized");
+  Serial.println("Accelerator Pedal Initialized");
 
   Gyro gy;
   gyro = &gy;
@@ -37,34 +37,32 @@ void setup() {
   pinMode(8, OUTPUT);
   pinMode(13, OUTPUT);
 
-  CarState initialCarState(gyro, steeringWheel, acceleratorPedal);
-
-  logger->log("Car State Initialized");
-  logger->log("Initializations Complete");
-
-  logger->log(initialCarState.getCSVLine());
-
   delay(3000);
+
+  CarState* carState = new CarState(gyro, steeringWheel, acceleratorPedal);
 
   while (true) {
     if (logger->errorFlag) {
       break;
     }
 
-    CarState carState(gyro, steeringWheel, acceleratorPedal);
-
-    // int steeringPercent = steeringWheel->getSteeringPercent();
-    int accelerationPercent = acceleratorPedal->getAcceleratorPercent();
+    // int steeringPercent = *(carState->steeringPercent);
+    // int accelerationPercent = *(carState->acceleratorPercent);
 
     // steeringWheel->steer(steeringPercent);
-    acceleratorPedal->accelerate(accelerationPercent);
+    // acceleratorPedal->accelerate(accelerationPercent);
 
-    logger->log(carState.getCSVLine());
+    long before = micros();
+    logger->log(carState->getValues(), carState->VALUES_LENGTH);
+    long after = micros();
+
+    Serial.println(after - before);
   }
   SPI.end();
-  pinMode(13, OUTPUT);
   steeringWheel->steer(0);
   acceleratorPedal->accelerate(0);
+
+  pinMode(13, OUTPUT);
 }
 
 void loop() {

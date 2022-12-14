@@ -39,7 +39,7 @@ void risingAcceleratorPWMPulse() {
   attachInterrupt(acceleratorInterruptPin, fallingAcceleratorPWMPulse, FALLING);
 }
 
-AcceleratorPedal::AcceleratorPedal(int pwmPinInput, int pwmPinOutput) {
+AcceleratorPedal::AcceleratorPedal(int pwmPinInput, int pwmPinOutput, int maximumPercent) {
   ACCELERATOR_PWM_PIN_INPUT = pwmPinInput;
   ACCELERATOR_PWM_PIN_OUTPUT = pwmPinOutput;
   pinMode(ACCELERATOR_PWM_PIN_INPUT, INPUT);
@@ -47,6 +47,8 @@ AcceleratorPedal::AcceleratorPedal(int pwmPinInput, int pwmPinOutput) {
 
   acceleratorInterruptPin = digitalPinToInterrupt(ACCELERATOR_PWM_PIN_INPUT);
   attachInterrupt(acceleratorInterruptPin, risingAcceleratorPWMPulse, RISING);
+
+  this->maximumPercent = maximumPercent;
 
   esc.attach(ACCELERATOR_PWM_PIN_OUTPUT);
 }
@@ -64,7 +66,6 @@ void AcceleratorPedal::accelerate(int percent) {
   }
 
   // Serial.println(outputValue);
-
   esc.write(outputValue);
 }
 

@@ -10,7 +10,7 @@ Gyro::Gyro() {
   return;
 }
 
-short int* Gyro::getAccelerometerData() {
+int* Gyro::getAccelerometerData() {
   Wire.beginTransmission(MPU6050_ADRESS);
   Wire.write(accelerometer_registers[0]);
   Wire.endTransmission(false);
@@ -23,7 +23,7 @@ short int* Gyro::getAccelerometerData() {
   return accelerometer;
 }
 
-short int* Gyro::getGyroData() {
+int* Gyro::getGyroData() {
   Wire.beginTransmission(MPU6050_ADRESS);
   Wire.write(gyro_registers[0]);
   Wire.endTransmission(false);

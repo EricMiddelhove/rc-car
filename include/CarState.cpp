@@ -3,62 +3,69 @@
 #include "Gyroscope.hpp"
 
 CarState::CarState(Gyro* gyro, SteeringWheel* steeringwheel, AcceleratorPedal* acceleratorpedal) {
-  short* gyroData = gyro->getGyroData();
-  short* accData = gyro->getAccelerometerData();
+  this->gyro = gyro;
+  this->steeringwheel = steeringwheel;
+  this->acceleratorpedal = acceleratorpedal;
 
-  this->xAcc = accData[0];
-  this->yAcc = accData[1];
-  this->zAcc = accData[2];
+  this->refresh();
 
-  this->xGyro = gyroData[0];
-  this->yGyro = gyroData[1];
-  this->zGyro = gyroData[2];
-
-  this->targetCourse = targetCourse;
-  this->zeroCourseGyroValue = this->zGyro;
-
-  this->steeringPercent = steeringwheel->getSteeringPercent();
-  this->acceleratorPercent = acceleratorpedal->getAcceleratorPercent();
-
-  this->course = 0;
+  // this->xAcc = &values[0];
+  // this->yAcc = &values[1];
+  // this->zAcc = &values[2];
+  // this->xGyro = &values[3];
+  // this->yGyro = &values[4];
+  // this->zGyro = &values[5];
+  // this->targetCourse = &values[6];
+  // this->course = &values[7];
+  // this->steeringPercent = &values[8];
+  // this->acceleratorPercent = &values[9];
 }
 
-CarState::CarState(Gyro* gyro) {
-  short* gyroData = gyro->getGyroData();
-  short* accData = gyro->getAccelerometerData();
+void CarState::refresh() {
+  int* gyroData = gyro->getGyroData();
+  int* accData = gyro->getAccelerometerData();
 
-  this->xAcc = accData[0];
-  this->yAcc = accData[1];
-  this->zAcc = accData[2];
+  accData[0] = -accData[0];
 
-  this->xGyro = gyroData[0];
-  this->yGyro = gyroData[1];
-  this->zGyro = gyroData[2];
+  values[1] = (accData[0] & 0xFF);
+  values[0] = (accData[0] >> 8) & 0xFF;
 
-  this->targetCourse = targetCourse;
+  values[3] = accData[1] & 0xFF;
+  values[2] = accData[1] >> 8 & 0xFF;
 
-  this->course = map(this->zGyro, zeroCourseGyroValue, 32767, 0, 360);
+  values[5] = accData[2] & 0xFF;
+  values[4] = accData[2] >> 8 & 0xFF;
+
+  values[7] = gyroData[0] & 0xFF;
+  values[6] = gyroData[0] >> 8 & 0xFF;
+
+  values[9] = gyroData[1] & 0xFF;
+  values[8] = gyroData[1] >> 8 & 0xFF;
+
+  values[11] = gyroData[2] & 0xFF;
+  values[10] = gyroData[2] >> 8 & 0xFF;
+
+  int steeringPercent = steeringwheel->getSteeringPercent();
+  values[13] = steeringPercent & 0xFF;
+  values[12] = (steeringPercent >> 8) & 0xFF;
+
+  int acceleratorPercent = acceleratorpedal->getAcceleratorPercent();
+  values[15] = acceleratorPercent & 0xFF;
+  values[14] = (acceleratorPercent >> 8) & 0xFF;
+
+  int course = 0;
+  values[17] = course & 0xFF;
+  values[16] = (course >> 8) & 0xFF;
+
+  int targetCourse = 0;
+  values[19] = targetCourse & 0xFF;
+  values[18] = (targetCourse >> 8) & 0xFF;
 }
 
 CarState::CarState() {
   // TODO: Adjust Values
 }
 
-String CarState::getCSVLine() {
-  String csvLine = "";
-  csvLine += String(this->xAcc) + ",";
-  csvLine += String(this->zAcc) + ",";
-  csvLine += String(this->yAcc) + ",";
-
-  csvLine += String(this->xGyro) + ",";
-  csvLine += String(this->yGyro) + ",";
-  csvLine += String(this->zGyro) + ",";
-
-  csvLine += String(this->course) + ",";
-  csvLine += String(this->targetCourse) + ",";
-
-  csvLine += String(this->steeringPercent) + ",";
-  csvLine += String(this->acceleratorPercent);
-
-  return csvLine;
+char* CarState::getValues() {
+  return this->values;
 }

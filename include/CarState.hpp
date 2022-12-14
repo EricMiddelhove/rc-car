@@ -8,27 +8,37 @@
 
 class CarState {
  public:
-  short xAcc;
-  short yAcc;
-  short zAcc;
-  short xGyro;
-  short yGyro;
-  short zGyro;
-
-  int steeringPercent;
-  int acceleratorPercent;
-
-  short course;
-  short targetCourse;
-
   CarState(Gyro* gyro, SteeringWheel* steeringwheel, AcceleratorPedal* acceleratorpedal);
-  CarState(Gyro* gyro);
   CarState();
+  const int VALUES_LENGTH = 20;
 
-  String getCSVLine();
+  void refresh();
+
+  // String getCSVLine();
+  String getCSVHeader();
+
+  char* getValues();
+
+  int* xAcc;
+  int* yAcc;
+  int* zAcc;
+  int* xGyro;
+  int* yGyro;
+  int* zGyro;
+
+  int* steeringPercent;
+  int* acceleratorPercent;
+
+  int* course;
+  int* targetCourse;
 
  private:
-  short zeroCourseGyroValue;
+  char* values = new char[VALUES_LENGTH];
+
+  int zeroCourseGyroValue;
+  Gyro* gyro;
+  SteeringWheel* steeringwheel;
+  AcceleratorPedal* acceleratorpedal;
 };
 
 #endif

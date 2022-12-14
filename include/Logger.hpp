@@ -9,7 +9,7 @@ class Logger {
   bool errorFlag = false;
   Logger();
   ~Logger();
-  void log(String message);
+  void log(char* message, int length);
 
   File logFile;
 };
