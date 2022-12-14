@@ -53,6 +53,7 @@ void Logger::log(char* message, int length) {
     Logger::logFile.flush();
 
   } else {
+    Serial.println("Error writing to file");
     this->errorFlag = true;
   }
   return;

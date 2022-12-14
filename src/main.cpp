@@ -46,6 +46,8 @@ void setup() {
       break;
     }
 
+    carState->refresh();
+
     // int steeringPercent = *(carState->steeringPercent);
     // int accelerationPercent = *(carState->acceleratorPercent);
 
