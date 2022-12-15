@@ -14,23 +14,21 @@ class CarState {
 
   void refresh();
 
-  // String getCSVLine();
-  String getCSVHeader();
-
   char* getValues();
 
-  int* xAcc;
-  int* yAcc;
-  int* zAcc;
-  int* xGyro;
-  int* yGyro;
-  int* zGyro;
+  int getXAcc();
+  int getYAcc();
+  int getZAcc();
 
-  int* steeringPercent;
-  int* acceleratorPercent;
+  int getXGyro();
+  int getYGyro();
+  int getZGyro();
 
-  int* course;
-  int* targetCourse;
+  int getSteeringPercent();
+  int getAcceleratorPercent();
+
+  int getCourse();
+  int getTargetCourse();
 
  private:
   char* values = new char[VALUES_LENGTH];

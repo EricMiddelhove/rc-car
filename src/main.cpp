@@ -46,8 +46,6 @@ void setup() {
       break;
     }
 
-    carState->refresh();
-
     // int steeringPercent = *(carState->steeringPercent);
     // int accelerationPercent = *(carState->acceleratorPercent);
 
@@ -55,10 +53,17 @@ void setup() {
     // acceleratorPedal->accelerate(accelerationPercent);
 
     long before = micros();
-    logger->log(carState->getValues(), carState->VALUES_LENGTH);
+    carState->refresh();
+    char* state = carState->getValues();
     long after = micros();
 
-    Serial.println(after - before);
+    long before2 = micros();
+    logger->log(state, carState->VALUES_LENGTH);
+    long after2 = micros();
+
+    Serial.print(after - before);
+    Serial.print(" ");
+    Serial.println(after2 - before2);
   }
   SPI.end();
   steeringWheel->steer(0);

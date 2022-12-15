@@ -4,7 +4,7 @@
 #define DEBUG_MODE 0
 
 Logger::Logger() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("Initializing SD card...");
 
   bool successful = SD.begin(53);

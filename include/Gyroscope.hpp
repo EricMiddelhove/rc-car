@@ -22,6 +22,9 @@ class Gyro {
 
   int* getGyroData();
 
+  void getGyroData(char* results);
+  void getAccelerometerData(char* results);
+
   void sleep();
 
   void wake();

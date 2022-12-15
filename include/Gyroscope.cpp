@@ -36,6 +36,34 @@ int* Gyro::getGyroData() {
   return gyro;
 }
 
+void Gyro::getAccelerometerData(char* results) {
+  Wire.beginTransmission(MPU6050_ADRESS);
+  Wire.write(accelerometer_registers[0]);
+  Wire.endTransmission(false);
+  Wire.requestFrom(MPU6050_ADRESS, 6, true);
+
+  for (int i = 0; i < 6; i += 2) {
+    results[i] = Wire.read();
+    results[i + 1] = Wire.read();
+  }
+
+  return;
+}
+
+void Gyro::getGyroData(char* results) {
+  Wire.beginTransmission(MPU6050_ADRESS);
+  Wire.write(gyro_registers[0]);
+  Wire.endTransmission(false);
+  Wire.requestFrom(MPU6050_ADRESS, 6, true);
+
+  for (int i = 0; i < 6; i += 2) {
+    results[i] = Wire.read();
+    results[i + 1] = Wire.read();
+  }
+
+  return;
+}
+
 void Gyro::sleep() {
   Wire.begin();
   Wire.beginTransmission(MPU6050_ADRESS);  // Begins a transmission to the I2C slave (GY-521 board)

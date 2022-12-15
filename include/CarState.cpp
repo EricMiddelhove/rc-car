@@ -8,42 +8,61 @@ CarState::CarState(Gyro* gyro, SteeringWheel* steeringwheel, AcceleratorPedal* a
   this->acceleratorpedal = acceleratorpedal;
 
   this->refresh();
+}
 
-  // this->xAcc = &values[0];
-  // this->yAcc = &values[1];
-  // this->zAcc = &values[2];
-  // this->xGyro = &values[3];
-  // this->yGyro = &values[4];
-  // this->zGyro = &values[5];
-  // this->targetCourse = &values[6];
-  // this->course = &values[7];
-  // this->steeringPercent = &values[8];
-  // this->acceleratorPercent = &values[9];
+int CarState::getXAcc() {
+  int v = (values[0] << 8 | values[1]);
+  return v;
+}
+
+int CarState::getYAcc() {
+  int v = (values[2] << 8 | values[3]);
+  return v;
+}
+
+int CarState::getZAcc() {
+  int v = (values[4] << 8 | values[5]);
+  return v;
+}
+
+int CarState::getXGyro() {
+  int v = (values[6] << 8 | values[7]);
+  return v;
+}
+
+int CarState::getYGyro() {
+  int v = (values[8] << 8 | values[9]);
+  return v;
+}
+
+int CarState::getZGyro() {
+  int v = (values[10] << 8 | values[11]);
+  return v;
+}
+
+int CarState::getSteeringPercent() {
+  int v = (values[12] << 8 | values[13]);
+  return v;
+}
+
+int CarState::getAcceleratorPercent() {
+  int v = (values[14] << 8 | values[15]);
+  return v;
+}
+
+int CarState::getCourse() {
+  int v = (values[16] << 8 | values[17]);
+  return v;
+}
+
+int CarState::getTargetCourse() {
+  int v = (values[18] << 8 | values[19]);
+  return v;
 }
 
 void CarState::refresh() {
-  int* gyroData = gyro->getGyroData();
-  int* accData = gyro->getAccelerometerData();
-
-  accData[0] = -accData[0];
-
-  values[1] = (accData[0] & 0xFF);
-  values[0] = (accData[0] >> 8) & 0xFF;
-
-  values[3] = accData[1] & 0xFF;
-  values[2] = accData[1] >> 8 & 0xFF;
-
-  values[5] = accData[2] & 0xFF;
-  values[4] = accData[2] >> 8 & 0xFF;
-
-  values[7] = gyroData[0] & 0xFF;
-  values[6] = gyroData[0] >> 8 & 0xFF;
-
-  values[9] = gyroData[1] & 0xFF;
-  values[8] = gyroData[1] >> 8 & 0xFF;
-
-  values[11] = gyroData[2] & 0xFF;
-  values[10] = gyroData[2] >> 8 & 0xFF;
+  gyro->getGyroData(values);               // initialises 6 bytes
+  gyro->getAccelerometerData(values + 6);  // initialises 6 bytes
 
   int steeringPercent = steeringwheel->getSteeringPercent();
   values[13] = steeringPercent & 0xFF;
