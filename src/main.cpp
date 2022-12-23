@@ -35,7 +35,8 @@ void setup() {
   gyro = &gy;
   Serial.println("Gyroscope Initialized");
 
-  compass = new Compass();
+  Compass c;
+  compass = &c;
   Serial.println("Compass Initialized");
 
   gyro->wake();
@@ -71,19 +72,21 @@ void setup() {
 
     // Serial.println(value);
 
-    Serial.print("X: ");
-    Serial.print(compass->getAxisValue('x'));
+    // Serial.print("X: ");
+    // Serial.print(compass->getAxisValue('x'));
 
-    Serial.print(" Y: ");
-    Serial.print(compass->getAxisValue('y'));
+    // Serial.print(" Y: ");
+    // Serial.print(compass->getAxisValue('y'));
 
-    Serial.print(" Z: ");
-    Serial.print(compass->getAxisValue('z'));
+    // Serial.print(" Z: ");
+    // Serial.print(compass->getAxisValue('z'));
 
     Serial.print(" Azimuth: ");
     Serial.print(compass->getAzimuth());
 
     Serial.println();
+
+    // delay(100);
 
     // logger->log(carState->getValues(), carState->VALUES_LENGTH);
   }
