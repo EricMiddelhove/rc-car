@@ -3,14 +3,15 @@
 
 #include "AcceleratorPedal.hpp"
 #include "Arduino.h"
+#include "Compass.hpp"
 #include "Gyroscope.hpp"
 #include "SteeringWheel.hpp"
 
 class CarState {
  public:
-  CarState(Gyro* gyro, SteeringWheel* steeringwheel, AcceleratorPedal* acceleratorpedal);
+  CarState(Gyro* gyro, SteeringWheel* steeringwheel, AcceleratorPedal* acceleratorpedal, Compass* compass);
   CarState();
-  const int VALUES_LENGTH = 20;
+  const static int VALUES_LENGTH = 20;
 
   void refresh();
 
@@ -30,13 +31,18 @@ class CarState {
   int getCourse();
   int getTargetCourse();
 
+  static void average(CarState* states[], int length, CarState* result);
+
  private:
   char* values = new char[VALUES_LENGTH];
+
+  int initialCourse;
 
   int zeroCourseGyroValue;
   Gyro* gyro;
   SteeringWheel* steeringwheel;
   AcceleratorPedal* acceleratorpedal;
+  Compass* compass;
 };
 
 #endif

@@ -4,9 +4,9 @@
 #include <Wire.h>
 
 Gyro::Gyro() {
-  pinMode(LED_BUILTIN, OUTPUT);
   wake();
-  digitalWrite(LED_BUILTIN, HIGH);
+  configure();
+
   return;
 }
 
@@ -34,6 +34,21 @@ int* Gyro::getGyroData() {
   }
 
   return gyro;
+}
+
+int Gyro::getGyroDataOfAxis(char axis) {
+  axis = axis | 0x20;  // convert to lowercase
+
+  byte ident = axis - 120;  // convert /x/y/z/ to /0/1/2/
+
+  Wire.beginTransmission(MPU6050_ADRESS);
+  Wire.write(gyro_registers[ident]);
+  Wire.endTransmission(false);
+  Wire.requestFrom(MPU6050_ADRESS, 2, true);
+
+  int result = Wire.read() << 8 | Wire.read();
+
+  return result;
 }
 
 void Gyro::getAccelerometerData(char* results) {
@@ -80,5 +95,35 @@ void Gyro::wake() {
   Wire.write(0x6B);                        // PWR_MGMT_1 register
   Wire.write(0);                           // set to zero (wakes up the MPU-6050)
   Wire.endTransmission(true);
+  return;
+}
+
+void Gyro::configure() {
+  Wire.beginTransmission(MPU6050_ADRESS);
+  Wire.write(0x1B);  // Gyro config
+  Wire.write(0x00);  // +/- 250 degrees per second full scale
+  Wire.endTransmission(true);
+
+  Wire.beginTransmission(MPU6050_ADRESS);
+  Wire.write(0x1B);  // Accel config
+  Wire.endTransmission(true);
+
+  Wire.requestFrom(MPU6050_ADRESS, 1, true);
+  byte result = Wire.read();
+
+  Serial.print("Accel config: ");
+  Serial.println(result, BIN);
+
+  return;
+}
+
+void Gyro::trim() {
+  Wire.beginTransmission(MPU6050_ADRESS);
+  Wire.write(0x10);
+  Wire.endTransmission(false);
+
+  Wire.beginTransmission(MPU6050_ADRESS);
+  Wire.write(0b00011111);
+
   return;
 }

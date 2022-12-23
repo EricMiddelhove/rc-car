@@ -2,6 +2,7 @@
 
 #include "AcceleratorPedal.cpp"
 #include "CarState.cpp"
+#include "Compass.cpp"
 #include "Gyroscope.cpp"
 #include "Logger.cpp"
 #include "SPI.h"
@@ -13,8 +14,9 @@ SteeringWheel* steeringWheel = NULL;
 AcceleratorPedal* acceleratorPedal = NULL;
 Gyro* gyro = NULL;
 
+Compass* compass = NULL;
+
 void setup() {
-  analogWrite(10, RAW_NO_ACCELERATOR);
 // put your setup code here, to run once:
 #if (DEBUG_MODE > 1)
 #endif
@@ -31,39 +33,59 @@ void setup() {
 
   Gyro gy;
   gyro = &gy;
+  Serial.println("Gyroscope Initialized");
+
+  compass = new Compass();
+  Serial.println("Compass Initialized");
 
   gyro->wake();
 
   pinMode(8, OUTPUT);
   pinMode(13, OUTPUT);
 
-  delay(3000);
+  CarState* carState = new CarState(gyro, steeringWheel, acceleratorPedal, compass);
 
-  CarState* carState = new CarState(gyro, steeringWheel, acceleratorPedal);
+  int course = 0;
 
   while (true) {
-    if (logger->errorFlag) {
-      break;
-    }
+    // int steeringPercent = carState->getSteeringPercent();
+    // int accelerationPercent = carState->getAcceleratorPercent();
 
-    // int steeringPercent = *(carState->steeringPercent);
-    // int accelerationPercent = *(carState->acceleratorPercent);
+    // Serial.print(",");
+    // Serial.print(steeringPercent);
+    // Serial.print(",");
+    // Serial.print(accelerationPercent);
 
     // steeringWheel->steer(steeringPercent);
     // acceleratorPedal->accelerate(accelerationPercent);
 
-    long before = micros();
-    carState->refresh();
-    char* state = carState->getValues();
-    long after = micros();
+    // int zGyro = gyro->getGyroDataOfAxis('Z');
 
-    long before2 = micros();
-    logger->log(state, carState->VALUES_LENGTH);
-    long after2 = micros();
+    // zGyro = map(zGyro, -32765, 32765, -25000, 25000) - 100;
+    // Serial.print(",");
+    // Serial.println(zGyro);
 
-    Serial.print(after - before);
-    Serial.print(" ");
-    Serial.println(after2 - before2);
+    // course += zGyro / 10;
+
+    // Serial.println(course / 100);
+
+    // Serial.println(value);
+
+    Serial.print("X: ");
+    Serial.print(compass->getAxisValue('x'));
+
+    Serial.print(" Y: ");
+    Serial.print(compass->getAxisValue('y'));
+
+    Serial.print(" Z: ");
+    Serial.print(compass->getAxisValue('z'));
+
+    Serial.print(" Azimuth: ");
+    Serial.print(compass->getAzimuth());
+
+    Serial.println();
+
+    // logger->log(carState->getValues(), carState->VALUES_LENGTH);
   }
   SPI.end();
   steeringWheel->steer(0);

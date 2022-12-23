@@ -2,12 +2,18 @@
 
 #include "Gyroscope.hpp"
 
-CarState::CarState(Gyro* gyro, SteeringWheel* steeringwheel, AcceleratorPedal* acceleratorpedal) {
+CarState::CarState(Gyro* gyro, SteeringWheel* steeringwheel, AcceleratorPedal* acceleratorpedal, Compass* compass) {
   this->gyro = gyro;
   this->steeringwheel = steeringwheel;
   this->acceleratorpedal = acceleratorpedal;
+  this->compass = compass;
 
-  this->refresh();
+  this->initialCourse = compass->getAzimuth();
+
+  // this->refresh();
+}
+
+CarState::CarState() {
 }
 
 int CarState::getXAcc() {
@@ -61,8 +67,8 @@ int CarState::getTargetCourse() {
 }
 
 void CarState::refresh() {
-  gyro->getGyroData(values);               // initialises 6 bytes
-  gyro->getAccelerometerData(values + 6);  // initialises 6 bytes
+  gyro->getAccelerometerData(values);  // initialises 6 bytes
+  gyro->getGyroData(values + 6);       // initialises 6 bytes
 
   int steeringPercent = steeringwheel->getSteeringPercent();
   values[13] = steeringPercent & 0xFF;
@@ -72,7 +78,7 @@ void CarState::refresh() {
   values[15] = acceleratorPercent & 0xFF;
   values[14] = (acceleratorPercent >> 8) & 0xFF;
 
-  int course = 0;
+  int course = compass->getAzimuth() - initialCourse;
   values[17] = course & 0xFF;
   values[16] = (course >> 8) & 0xFF;
 
@@ -81,10 +87,20 @@ void CarState::refresh() {
   values[18] = (targetCourse >> 8) & 0xFF;
 }
 
-CarState::CarState() {
-  // TODO: Adjust Values
-}
-
 char* CarState::getValues() {
   return this->values;
+}
+
+void CarState::average(CarState* states[], int length, CarState* result) {
+  for (int j = 0; j < length; j++) {
+    CarState* currentStateInIteration = states[j];
+    for (int i = 0; i < VALUES_LENGTH; i += 2) {
+      result->values[i] *= currentStateInIteration->values[i];
+    }
+  }
+
+  for (int i = 0; i < VALUES_LENGTH; i += 2) {
+    int avg = result->values[i] / length;
+    result->values[i] = avg & 0xFF;
+  }
 }

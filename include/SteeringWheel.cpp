@@ -57,7 +57,6 @@ void SteeringWheel::steer(int percent) {
   steeringPercent = percent;
 
   int steeringPwmOutput = map(steeringPercent, -100, 100, RAW_STEERING_FULL_RIGHT, RAW_STEERING_FULL_LEFT);
-
   steeringServo.write(steeringPwmOutput);
 }
 

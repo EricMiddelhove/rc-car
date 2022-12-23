@@ -51,6 +51,7 @@ AcceleratorPedal::AcceleratorPedal(int pwmPinInput, int pwmPinOutput, int maximu
   this->maximumPercent = maximumPercent;
 
   esc.attach(ACCELERATOR_PWM_PIN_OUTPUT);
+  this->accelerate(0);
 }
 
 void AcceleratorPedal::accelerate(int percent) {

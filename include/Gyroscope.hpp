@@ -7,13 +7,15 @@
 class Gyro {
  private:
   int accelerometer[3];  // [accX, accY, accZ]
-  int accelerometer_registers[3] = {0x3B, 0x3C, 0x3D};
+  byte accelerometer_registers[3] = {0x3B, 0x3D, 0x3F};
   int gyro[3];  // [gyrX, gyrY, gyrZ]
-  int gyro_registers[3] = {0x43, 0x44, 0x45};
+  byte gyro_registers[3] = {0x43, 0x45, 0x47};
 
-  const int MPU6050_ADRESS = 0x68;
+  const byte MPU6050_ADRESS = 0x68;
 
-  const int PWR_MGMT = 0x6B;
+  const byte PWR_MGMT = 0x6B;
+
+  void configure();
 
  public:
   Gyro();
@@ -22,12 +24,16 @@ class Gyro {
 
   int* getGyroData();
 
+  int getGyroDataOfAxis(char axis);
+
   void getGyroData(char* results);
   void getAccelerometerData(char* results);
 
   void sleep();
 
   void wake();
+
+  void trim();
 };
 
 #endif
