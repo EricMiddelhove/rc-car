@@ -51,7 +51,7 @@ int Gyro::getGyroDataOfAxis(char axis) {
   return result;
 }
 
-void Gyro::getAccelerometerData(char* results) {
+void Gyro::getAccelerometerData(byte* results) {
   Wire.beginTransmission(MPU6050_ADRESS);
   Wire.write(accelerometer_registers[0]);
   Wire.endTransmission(false);
@@ -65,7 +65,7 @@ void Gyro::getAccelerometerData(char* results) {
   return;
 }
 
-void Gyro::getGyroData(char* results) {
+void Gyro::getGyroData(byte* results) {
   Wire.beginTransmission(MPU6050_ADRESS);
   Wire.write(gyro_registers[0]);
   Wire.endTransmission(false);

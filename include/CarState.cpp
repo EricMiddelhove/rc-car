@@ -78,8 +78,8 @@ void CarState::refresh() {
   values[15] = acceleratorPercent & 0xFF;
   values[14] = (acceleratorPercent >> 8) & 0xFF;
 
-  int course = compass->getAzimuth() - initialCourse;
-  values[17] = course & 0xFF;
+  int course = compass->getAzimuth();
+  values[17] = (course & 0xFF);
   values[16] = (course >> 8) & 0xFF;
 
   int targetCourse = 0;
@@ -87,7 +87,7 @@ void CarState::refresh() {
   values[18] = (targetCourse >> 8) & 0xFF;
 }
 
-char* CarState::getValues() {
+byte* CarState::getValues() {
   return this->values;
 }
 

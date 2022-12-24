@@ -9,7 +9,7 @@ class Logger {
   bool errorFlag = false;
   Logger();
   ~Logger();
-  void log(char* message, int length);
+  void log(byte* message, int length);
 
   File logFile;
 };

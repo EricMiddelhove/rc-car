@@ -21,7 +21,7 @@ int Compass::getAzimuth() {
 
   Wire.requestFrom(COMPASS_ADDRESS, 6, true);
 
-  int16_t x, y;
+  int x, y;
   byte read1, read2;
 
   read1 = Wire.read();

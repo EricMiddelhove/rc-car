@@ -47,9 +47,10 @@ Logger::~Logger() {
   Serial.println("Logger closed");
 }
 
-void Logger::log(char* message, int length) {
+void Logger::log(byte* message, int length) {
   if (Logger::logFile) {
-    Logger::logFile.write(message, length);
+    // TODO: Convert bytes array to char array (fast)
+    Logger::logFile.write((char*)message, length);
     Logger::logFile.flush();
 
   } else {

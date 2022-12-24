@@ -26,8 +26,8 @@ class Gyro {
 
   int getGyroDataOfAxis(char axis);
 
-  void getGyroData(char* results);
-  void getAccelerometerData(char* results);
+  void getGyroData(byte* results);
+  void getAccelerometerData(byte* results);
 
   void sleep();
 

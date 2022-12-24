@@ -15,7 +15,7 @@ class CarState {
 
   void refresh();
 
-  char* getValues();
+  byte* getValues();
 
   int getXAcc();
   int getYAcc();
@@ -34,7 +34,7 @@ class CarState {
   static void average(CarState* states[], int length, CarState* result);
 
  private:
-  char* values = new char[VALUES_LENGTH];
+  byte* values = new byte[VALUES_LENGTH];
 
   int initialCourse;
 

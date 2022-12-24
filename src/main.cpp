@@ -46,49 +46,23 @@ void setup() {
 
   CarState* carState = new CarState(gyro, steeringWheel, acceleratorPedal, compass);
 
-  int course = 0;
-
   while (true) {
-    // int steeringPercent = carState->getSteeringPercent();
-    // int accelerationPercent = carState->getAcceleratorPercent();
+    carState->refresh();
 
-    // Serial.print(",");
-    // Serial.print(steeringPercent);
-    // Serial.print(",");
-    // Serial.print(accelerationPercent);
+    int steeringPercent = carState->getSteeringPercent();
+    int accelerationPercent = carState->getAcceleratorPercent();
 
-    // steeringWheel->steer(steeringPercent);
-    // acceleratorPedal->accelerate(accelerationPercent);
+    steeringWheel->steer(steeringPercent);
+    acceleratorPedal->accelerate(accelerationPercent);
 
-    // int zGyro = gyro->getGyroDataOfAxis('Z');
+    // carState->getCourse();
 
-    // zGyro = map(zGyro, -32765, 32765, -25000, 25000) - 100;
-    // Serial.print(",");
-    // Serial.println(zGyro);
-
-    // course += zGyro / 10;
-
-    // Serial.println(course / 100);
-
-    // Serial.println(value);
-
-    // Serial.print("X: ");
-    // Serial.print(compass->getAxisValue('x'));
-
-    // Serial.print(" Y: ");
-    // Serial.print(compass->getAxisValue('y'));
-
-    // Serial.print(" Z: ");
-    // Serial.print(compass->getAxisValue('z'));
-
-    Serial.print(" Azimuth: ");
-    Serial.print(compass->getAzimuth());
-
-    Serial.println();
+    Serial.print(" external course: ");
+    Serial.println(carState->getCourse());
 
     // delay(100);
 
-    // logger->log(carState->getValues(), carState->VALUES_LENGTH);
+    logger->log(carState->getValues(), carState->VALUES_LENGTH);
   }
   SPI.end();
   steeringWheel->steer(0);
