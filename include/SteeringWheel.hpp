@@ -22,7 +22,7 @@ int8_t STEERING_PWM_PIN_OUTPUT;
 
 int steeringPreviousTime;
 int8_t steeringInterruptPin;
-bool steeringIsManual;
+bool steeringIsManual = false;
 int rawSteeringInputPWM;
 
 int steeringManualPWMInput;
@@ -31,6 +31,11 @@ class SteeringWheel {
  public:
   int8_t steeringOutputPin;
   SteeringWheel(int pwmPinInput, int pwmPinOutput);
+  /**
+   * @brief -100 (FULL RIGHT) to 100 (FULL LEFT)
+   *
+   * @param percent
+   */
   void steer(int percent);
   int getSteeringPercent();
 

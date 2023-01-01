@@ -16,10 +16,7 @@ Gyro* gyro = NULL;
 
 Compass* compass = NULL;
 
-void setup() {
-// put your setup code here, to run once:
-#if (DEBUG_MODE > 1)
-#endif
+void initialiseSensors() {
   Logger lg;
   logger = &lg;
 
@@ -33,37 +30,102 @@ void setup() {
 
   Gyro gy;
   gyro = &gy;
+  gyro->wake();
   Serial.println("Gyroscope Initialized");
 
   Compass c;
   compass = &c;
   Serial.println("Compass Initialized");
+}
 
-  gyro->wake();
+void emergencyTakeOver(CarState* carState) {
+  Serial.println("MANUAL OVERRIDE");
+
+  while (true) {
+    int inputSteeringPercent = steeringWheel->getSteeringPercent();
+    int inputAccelerationPercent = acceleratorPedal->getAcceleratorPercent();
+
+    Serial.print("Steering: ");
+    Serial.print(inputSteeringPercent);
+    Serial.print(" Acceleration: ");
+    Serial.println(inputAccelerationPercent);
+
+    steeringWheel->steer(inputSteeringPercent);
+    acceleratorPedal->accelerate(inputAccelerationPercent);
+  }
+}
+
+/**
+ * @brief Calculates the steering percent required to steer the car to the target course
+ * Angle is calculated linearly from -100 to 100
+ *
+ * @param targetCourse
+ * @param currentCourse
+ * @param sensitivityFactor - the higher the value, the more sensitive the steering is (normal values are 1 - 2)
+ * @return int
+ */
+int calculateSteeringPercent(int16_t targetCourse, int16_t currentCourse, uint8_t sensitivityFactor) {
+  int16_t diff = targetCourse - currentCourse;
+
+  if (diff > 180) {
+    diff = diff - 360;
+  } else if (diff < -180) {
+    diff = diff + 360;
+  }
+
+  int16_t steeringPercent = (diff * 100) / 180;
+
+  steeringPercent = steeringPercent * sensitivityFactor;
+
+  if (steeringPercent > 100) {
+    steeringPercent = 100;
+  } else if (steeringPercent < -100) {
+    steeringPercent = -100;
+  }
+
+  return -steeringPercent;
+}
+
+void setup() {
+  steeringIsManual = false;
+  acceleratorIsManual = false;
 
   pinMode(8, OUTPUT);
   pinMode(13, OUTPUT);
 
+  initialiseSensors();
+
   CarState* carState = new CarState(gyro, steeringWheel, acceleratorPedal, compass);
+
+  carState->setTargetCourse(20);
+  acceleratorPedal->accelerate(40);
 
   while (true) {
     carState->refresh();
 
-    int steeringPercent = carState->getSteeringPercent();
-    int accelerationPercent = carState->getAcceleratorPercent();
+    if (steeringIsManual || acceleratorIsManual) {
+      Serial.print("Steering is Manual: ");
+      Serial.print(steeringIsManual);
+      Serial.print("\tAcceleration is Manual: ");
+      Serial.println(acceleratorIsManual);
+      emergencyTakeOver(carState);
+    }
+
+    const int targetCourse = carState->getTargetCourse();
+    const int currentCourse = carState->getLocalCourse();
+
+    Serial.print("Target Course: ");
+    Serial.print(targetCourse);
+    Serial.print("\tCurrent Course: ");
+    Serial.print(currentCourse);
+
+    int steeringPercent = calculateSteeringPercent(targetCourse, currentCourse, 3);
+    Serial.print("\tSteering Percent: ");
+    Serial.println(steeringPercent);
 
     steeringWheel->steer(steeringPercent);
-    acceleratorPedal->accelerate(accelerationPercent);
-
-    // carState->getCourse();
-
-    Serial.print(" external course: ");
-    Serial.println(carState->getCourse());
-
-    // delay(100);
-
-    logger->log(carState->getValues(), carState->VALUES_LENGTH);
   }
+
   SPI.end();
   steeringWheel->steer(0);
   acceleratorPedal->accelerate(0);

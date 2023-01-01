@@ -5,14 +5,28 @@
 
 int accSampleNumber = 0;
 int accSampleSum = 0;
-int lollo = 0;
-// Might conflict with interrupt of steering reading, when pulse happens at the same time
+
+int manualAccelerationInputCounter = 0;
+int acceleratorPulseCounter = 0;
+
 void fallingAcceleratorPWMPulse() {
+  acceleratorPulseCounter++;
+  if (acceleratorPulseCounter > 20) {
+    acceleratorPulseCounter = 0;
+    manualAccelerationInputCounter = 0;
+  }
+
   int currentTime = micros();
   int pulseWidth = currentTime - acceleratorPreviousTime;
-  lollo = pulseWidth;
-  if (pulseWidth < RAW_NO_ACCELERATOR - 10 || pulseWidth > RAW_NO_ACCELERATOR + 10) {
-    acceleratorIsManual = true;
+
+  if (pulseWidth < RAW_NO_ACCELERATOR - 100 || pulseWidth > RAW_NO_ACCELERATOR + 100) {
+    manualAccelerationInputCounter++;
+
+    if (manualAccelerationInputCounter > 5) {
+      Serial.println("Manual Accelerator Detected");
+      acceleratorIsManual = true;
+      manualAccelerationInputCounter = 0;
+    }
   } else {
     acceleratorIsManual = false;
   }

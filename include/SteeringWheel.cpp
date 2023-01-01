@@ -8,12 +8,29 @@
 
 int sampleNumber = 0;
 int sampleSum = 0;
+
+int manualSteeringInputCounter = 0;
+int steeringPulseCounter = 0;
+
 void fallingSteeringPWMPulse() {
+  steeringPulseCounter++;
+  if (steeringPulseCounter > 20) {
+    steeringPulseCounter = 0;
+    manualSteeringInputCounter = 0;
+  }
+
   int currentTime = micros();
   int pulseWidth = currentTime - steeringPreviousTime;
 
-  if (pulseWidth < 1460 || pulseWidth > 1480) {
-    steeringIsManual = true;
+  if (pulseWidth < 1420 || pulseWidth > 1500) {
+    manualSteeringInputCounter++;
+
+    if (manualSteeringInputCounter > 5) {
+      Serial.println("Manual Steering Detected");
+      steeringIsManual = true;
+      manualSteeringInputCounter = 0;
+    }
+
   } else {
     steeringIsManual = false;
   }
@@ -52,8 +69,6 @@ SteeringWheel::SteeringWheel(int pwmPinInput, int pwmPinOutput) {
 }
 
 void SteeringWheel::steer(int percent) {
-  // -100 (FULL RIGHT) to 100 (FULL LEFT)
-
   steeringPercent = percent;
 
   int steeringPwmOutput = map(steeringPercent, -100, 100, RAW_STEERING_FULL_RIGHT, RAW_STEERING_FULL_LEFT);

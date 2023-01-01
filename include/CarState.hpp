@@ -28,8 +28,10 @@ class CarState {
   int getSteeringPercent();
   int getAcceleratorPercent();
 
-  int getCourse();
+  int getGlobalCourse();
+  int getLocalCourse();
   int getTargetCourse();
+  void setTargetCourse(int course);
 
   static void average(CarState* states[], int length, CarState* result);
 

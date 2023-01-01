@@ -19,6 +19,7 @@ class Gyro {
 
  public:
   Gyro();
+  ~Gyro();
 
   int* getAccelerometerData();
 

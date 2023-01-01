@@ -19,7 +19,7 @@ unsigned long acceleratorPreviousTime;
 byte acceleratorInterruptPin;
 int rawAcceleratorInputPWM;
 
-bool acceleratorIsManual;
+bool acceleratorIsManual = false;
 
 byte manualPWMInput;
 

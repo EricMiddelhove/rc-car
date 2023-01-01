@@ -56,14 +56,29 @@ int CarState::getAcceleratorPercent() {
   return v;
 }
 
-int CarState::getCourse() {
+int CarState::getGlobalCourse() {
   int v = (values[16] << 8 | values[17]);
+  return v;
+}
+
+int CarState::getLocalCourse() {
+  int v = getGlobalCourse();
+
+  v = v - initialCourse;
+  if (v < 0) {
+    v = 360 + v;
+  }
   return v;
 }
 
 int CarState::getTargetCourse() {
   int v = (values[18] << 8 | values[19]);
   return v;
+}
+
+void CarState::setTargetCourse(int course) {
+  values[19] = course & 0xFF;
+  values[18] = (course >> 8) & 0xFF;
 }
 
 void CarState::refresh() {
@@ -81,10 +96,6 @@ void CarState::refresh() {
   int course = compass->getAzimuth();
   values[17] = (course & 0xFF);
   values[16] = (course >> 8) & 0xFF;
-
-  int targetCourse = 0;
-  values[19] = targetCourse & 0xFF;
-  values[18] = (targetCourse >> 8) & 0xFF;
 }
 
 byte* CarState::getValues() {
