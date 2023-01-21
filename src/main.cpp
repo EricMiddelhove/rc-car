@@ -8,6 +8,8 @@
 #include "SPI.h"
 #include "SteeringWheel.cpp"
 
+#define BUTTON_PIN 5
+
 Logger* logger = NULL;
 
 SteeringWheel* steeringWheel = NULL;
@@ -55,6 +57,13 @@ void emergencyTakeOver(CarState* carState) {
   }
 }
 
+void emergencyShutdown() {
+  Serial.println("EMERGENCY SHUTDOWN");
+
+  steeringWheel->steer(0);
+  acceleratorPedal->accelerate(0);
+}
+
 /**
  * @brief Calculates the steering percent required to steer the car to the target course
  * Angle is calculated linearly from -100 to 100
@@ -92,6 +101,7 @@ void setup() {
 
   pinMode(8, OUTPUT);
   pinMode(13, OUTPUT);
+  pinMode(BUTTON_PIN, INPUT);
 
   initialiseSensors();
 
@@ -100,10 +110,14 @@ void setup() {
   carState->setTargetCourse(20);
   acceleratorPedal->accelerate(40);
 
-  while (true) {
+  while (digitalRead(BUTTON_PIN) == 0) {
     carState->refresh();
 
-    if (steeringIsManual || acceleratorIsManual) {
+    // accelerator feed through
+    int inputAccelerationPercent = acceleratorPedal->getAcceleratorPercent();
+    acceleratorPedal->accelerate(inputAccelerationPercent);
+
+    if (steeringIsManual /*|| acceleratorIsManual*/) {
       Serial.print("Steering is Manual: ");
       Serial.print(steeringIsManual);
       Serial.print("\tAcceleration is Manual: ");
@@ -111,6 +125,7 @@ void setup() {
       emergencyTakeOver(carState);
     }
 
+    // Straight line steering
     const int targetCourse = carState->getTargetCourse();
     const int currentCourse = carState->getLocalCourse();
 
@@ -119,12 +134,17 @@ void setup() {
     Serial.print("\tCurrent Course: ");
     Serial.print(currentCourse);
 
-    int steeringPercent = calculateSteeringPercent(targetCourse, currentCourse, 3);
+    int steeringPercent = calculateSteeringPercent(targetCourse, currentCourse, 5);
     Serial.print("\tSteering Percent: ");
-    Serial.println(steeringPercent);
+    Serial.print(steeringPercent);
+
+    Serial.print("\tButton: ");
+    Serial.println(digitalRead(BUTTON_PIN));
 
     steeringWheel->steer(steeringPercent);
   }
+
+  emergencyShutdown();
 
   SPI.end();
   steeringWheel->steer(0);
