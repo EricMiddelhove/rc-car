@@ -5,15 +5,15 @@
 
 Logger::Logger() {
   Serial.begin(115200);
-  Serial.println("Initializing SD card...");
+  Serial.println(F("Initializing SD card..."));
 
   bool successful = SD.begin(53);
 
   if (!successful) {
-    Serial.println("Card Mount Failed");
+    Serial.println(F("Card Mount Failed"));
     return;
   } else {
-    Serial.println("Card Mount Successful");
+    Serial.println(F("Card Mount Successful"));
   }
 
   int logcount = 0;
@@ -22,13 +22,13 @@ Logger::Logger() {
   String filename = "";
 
   while (fileExists) {
-    filename = "log";
+    filename = F("log");
     filename.concat(logcount);
-    filename.concat(".bin");
+    filename.concat(F(".bin"));
 
-    Serial.print("Checking file: ");
+    Serial.print(F("Checking file: "));
     Serial.print(filename);
-    Serial.print("\n");
+    Serial.print(F("\n"));
     delay(100);
 
     fileExists = SD.exists(filename);
@@ -37,14 +37,26 @@ Logger::Logger() {
   }
   delay(500);
   Logger::logFile = SD.open(filename, FILE_WRITE);
-  Serial.println("Logger Initialized");
+  Serial.println(F("Logger Initialized"));
 }
 
-Logger::~Logger() {
-  Serial.println("Log Ending");
-  Logger::logFile.close();
+void Logger::flushBuffer() {
+  if (bufferUsed > 0) {
+    Logger::logFile.write((char*)buffer, bufferUsed);
+    Logger::logFile.flush();
 
-  Serial.println("Logger closed");
+    Serial.print(F("\tBuffer forcefully flushed"));
+
+    bufferIndex = 0;
+    bufferUsed = 0;
+  }
+}
+Logger::~Logger() {
+  Serial.print(F("Log Ending"));
+  logFile.close();
+
+  flushBuffer();
+  Serial.println(F("\tLogger closed"));
 }
 
 void Logger::log(byte* message, int length) {
@@ -54,8 +66,26 @@ void Logger::log(byte* message, int length) {
     Logger::logFile.flush();
 
   } else {
-    Serial.println("Error writing to file");
+    Serial.print(F("\tError writing to file"));
     this->errorFlag = true;
   }
   return;
+}
+
+void Logger::bufLog(byte* message, int length) {
+  if (bufferUsed + length > LOG_BUFFER_SIZE) {
+    Logger::logFile.write((char*)buffer, LOG_BUFFER_SIZE);
+    Logger::logFile.flush();
+
+    Serial.print(F("\tBuffer flushed"));
+
+    bufferIndex = 0;
+    bufferUsed = 0;
+  }
+
+  for (int i = 0; i < length; i++) {
+    buffer[bufferIndex] = message[i];
+    bufferIndex++;
+  }
+  bufferUsed += length;
 }

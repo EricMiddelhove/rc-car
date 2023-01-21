@@ -26,7 +26,7 @@ void fallingSteeringPWMPulse() {
     manualSteeringInputCounter++;
 
     if (manualSteeringInputCounter > 5) {
-      Serial.println("Manual Steering Detected");
+      Serial.println(F("Manual Steering Detected"));
       steeringIsManual = true;
       manualSteeringInputCounter = 0;
     }

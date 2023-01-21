@@ -1,6 +1,5 @@
-#include <Arduino.h>
-
 #include "AcceleratorPedal.cpp"
+#include "Arduino.h"
 #include "CarState.cpp"
 #include "Compass.cpp"
 #include "Gyroscope.cpp"
@@ -43,7 +42,7 @@ void initialiseSensors() {
 void emergencyTakeOver(CarState* carState) {
   Serial.println("MANUAL OVERRIDE");
 
-  while (true) {
+  while (digitalRead(BUTTON_PIN) == 0) {
     int inputSteeringPercent = steeringWheel->getSteeringPercent();
     int inputAccelerationPercent = acceleratorPedal->getAcceleratorPercent();
 
@@ -95,6 +94,17 @@ int calculateSteeringPercent(int16_t targetCourse, int16_t currentCourse, uint8_
   return -steeringPercent;
 }
 
+/**
+ * @brief Calculates the steering percent required to steer the car to the target course
+ *
+ * @param targetCourse
+ * @param currentCourse
+ * @return int
+ */
+int calculateSteeringPercent(int16_t targetCourse, int16_t currentCourse) {
+  return calculateSteeringPercent(targetCourse, currentCourse, 5);
+}
+
 void setup() {
   steeringIsManual = false;
   acceleratorIsManual = false;
@@ -103,6 +113,8 @@ void setup() {
   pinMode(13, OUTPUT);
   pinMode(BUTTON_PIN, INPUT);
 
+  delay(5000);
+
   initialiseSensors();
 
   CarState* carState = new CarState(gyro, steeringWheel, acceleratorPedal, compass);
@@ -110,38 +122,51 @@ void setup() {
   carState->setTargetCourse(20);
   acceleratorPedal->accelerate(40);
 
+  // Exit if button on pcb is pressed
   while (digitalRead(BUTTON_PIN) == 0) {
+    uint16_t startTime = millis();
     carState->refresh();
 
     // accelerator feed through
     int inputAccelerationPercent = acceleratorPedal->getAcceleratorPercent();
     acceleratorPedal->accelerate(inputAccelerationPercent);
 
-    if (steeringIsManual /*|| acceleratorIsManual*/) {
-      Serial.print("Steering is Manual: ");
+    if (steeringIsManual || acceleratorIsManual) {
+      Serial.print(F("Steering is Manual: "));
       Serial.print(steeringIsManual);
-      Serial.print("\tAcceleration is Manual: ");
+      Serial.print(F("\tAcceleration is Manual: "));
       Serial.println(acceleratorIsManual);
       emergencyTakeOver(carState);
+      break;
     }
 
     // Straight line steering
     const int targetCourse = carState->getTargetCourse();
     const int currentCourse = carState->getLocalCourse();
 
-    Serial.print("Target Course: ");
+    Serial.print(F("Target Course: "));
     Serial.print(targetCourse);
-    Serial.print("\tCurrent Course: ");
+    Serial.print(F("\tCurrent Course: "));
     Serial.print(currentCourse);
 
     int steeringPercent = calculateSteeringPercent(targetCourse, currentCourse, 5);
-    Serial.print("\tSteering Percent: ");
+    Serial.print(F("\tSteering Percent: "));
     Serial.print(steeringPercent);
 
-    Serial.print("\tButton: ");
-    Serial.println(digitalRead(BUTTON_PIN));
+    Serial.print(F("\tButton: "));
+    Serial.print(digitalRead(BUTTON_PIN));
+
+    logger->bufLog(carState->getValues(), CarState::VALUES_LENGTH);
+    // logger->log(carState->getValues(), CarState::VALUES_LENGTH);
 
     steeringWheel->steer(steeringPercent);
+
+    uint16_t endTime = millis();
+    uint16_t duration = endTime - startTime;
+    Serial.print(F("\tDuration: "));
+    Serial.print(duration);
+
+    Serial.println();
   }
 
   emergencyShutdown();
@@ -151,6 +176,14 @@ void setup() {
   acceleratorPedal->accelerate(0);
 
   pinMode(13, OUTPUT);
+
+  // Exit gracefully
+  delete logger;
+  delete carState;
+  delete steeringWheel;
+  delete acceleratorPedal;
+  delete gyro;
+  delete compass;
 }
 
 void loop() {
