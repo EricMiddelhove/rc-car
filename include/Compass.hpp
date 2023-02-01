@@ -2,6 +2,7 @@
 #define COMPASS_HPP
 
 #include "Arduino.h"
+#include "QMC5883LCompass.h"
 #include "Wire.h"
 
 #define COMPASS_ADDRESS 0x0D
@@ -12,7 +13,7 @@ class Compass {
   int getAzimuth();
 
  private:
-  byte axis_registers[3] = {0x00, 0x02, 0x04};  // x, y, z
+  QMC5883LCompass module;
 
   int zeroCourse;
 };

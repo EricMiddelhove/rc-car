@@ -1,9 +1,10 @@
 #include "AcceleratorPedal.cpp"
 #include "Arduino.h"
 #include "CarState.cpp"
-#include "Compass.cpp"
+// #include "Compass.cpp"
 #include "Gyroscope.cpp"
 #include "Logger.cpp"
+#include "QMC5883LCompass.h"
 #include "SPI.h"
 #include "SteeringWheel.cpp"
 
@@ -15,7 +16,8 @@ SteeringWheel* steeringWheel = NULL;
 AcceleratorPedal* acceleratorPedal = NULL;
 Gyro* gyro = NULL;
 
-Compass* compass = NULL;
+// Compass* compass = NULL;
+QMC5883LCompass compass;
 
 void initialiseSensors() {
   Logger lg;
@@ -23,20 +25,22 @@ void initialiseSensors() {
 
   SteeringWheel sw(2, 9);
   steeringWheel = &sw;
-  Serial.println("Steering Wheel Initialized");
+  Serial.println(F("Steering Wheel Initialized"));
 
   AcceleratorPedal ap(3, 10, 100);
   acceleratorPedal = &ap;
-  Serial.println("Accelerator Pedal Initialized");
+  Serial.println(F("Accelerator Pedal Initialized"));
 
   Gyro gy;
   gyro = &gy;
   gyro->wake();
-  Serial.println("Gyroscope Initialized");
+  Serial.println(F("Gyroscope Initialized"));
 
-  Compass c;
-  compass = &c;
-  Serial.println("Compass Initialized");
+  // Compass c;
+  // compass = &c;
+  compass.setMode(0b01000000, 0b00010000, 0b00000100, 0b00000001);
+  compass.setCalibration(-1205, 585, -1752, 45, -1626, 0);
+  Serial.println(F("Compass Initialized"));
 }
 
 void emergencyTakeOver(CarState* carState) {
@@ -117,7 +121,7 @@ void setup() {
 
   initialiseSensors();
 
-  CarState* carState = new CarState(gyro, steeringWheel, acceleratorPedal, compass);
+  CarState* carState = new CarState(gyro, steeringWheel, acceleratorPedal, &compass);
 
   carState->setTargetCourse(20);
   acceleratorPedal->accelerate(40);
@@ -149,7 +153,7 @@ void setup() {
     Serial.print(F("\tCurrent Course: "));
     Serial.print(currentCourse);
 
-    int steeringPercent = calculateSteeringPercent(targetCourse, currentCourse, 5);
+    int steeringPercent = calculateSteeringPercent(targetCourse, currentCourse, 10);
     Serial.print(F("\tSteering Percent: "));
     Serial.print(steeringPercent);
 
@@ -172,18 +176,32 @@ void setup() {
   emergencyShutdown();
 
   SPI.end();
-  steeringWheel->steer(0);
+
   acceleratorPedal->accelerate(0);
+
+  steeringWheel->steer(0);
+
+  delay(1000);
+
+  Serial.println(F("Steering: Full Left"));
+  steeringWheel->steer(100);
+  delay(2000);
+  Serial.println(F("Steering: Full Right"));
+  steeringWheel->steer(-100);
+  delay(2000);
+  Serial.println(F("Steering: Center"));
+  steeringWheel->steer(0);
 
   pinMode(13, OUTPUT);
 
   // Exit gracefully
+  logger->close();
   delete logger;
   delete carState;
   delete steeringWheel;
   delete acceleratorPedal;
   delete gyro;
-  delete compass;
+  // delete compass;
 }
 
 void loop() {

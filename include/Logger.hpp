@@ -20,7 +20,7 @@ class Logger {
   Logger();
   ~Logger();
   void log(byte* message, int length);
-
+  void close();
   void bufLog(byte* message, int length);
 
   File logFile;

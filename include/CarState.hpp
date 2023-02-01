@@ -3,13 +3,14 @@
 
 #include "AcceleratorPedal.hpp"
 #include "Arduino.h"
-#include "Compass.hpp"
+// #include "Compass.hpp"
 #include "Gyroscope.hpp"
+#include "QMC5883LCompass.h"
 #include "SteeringWheel.hpp"
 
 class CarState {
  public:
-  CarState(Gyro* gyro, SteeringWheel* steeringwheel, AcceleratorPedal* acceleratorpedal, Compass* compass);
+  CarState(Gyro* gyro, SteeringWheel* steeringwheel, AcceleratorPedal* acceleratorpedal, QMC5883LCompass* compass);
   CarState();
   const static int VALUES_LENGTH = 20;
 
@@ -44,7 +45,7 @@ class CarState {
   Gyro* gyro;
   SteeringWheel* steeringwheel;
   AcceleratorPedal* acceleratorpedal;
-  Compass* compass;
+  QMC5883LCompass* compass;
 };
 
 #endif

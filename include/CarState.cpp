@@ -2,7 +2,7 @@
 
 #include "Gyroscope.hpp"
 
-CarState::CarState(Gyro* gyro, SteeringWheel* steeringwheel, AcceleratorPedal* acceleratorpedal, Compass* compass) {
+CarState::CarState(Gyro* gyro, SteeringWheel* steeringwheel, AcceleratorPedal* acceleratorpedal, QMC5883LCompass* compass) {
   this->gyro = gyro;
   this->steeringwheel = steeringwheel;
   this->acceleratorpedal = acceleratorpedal;
@@ -93,6 +93,7 @@ void CarState::refresh() {
   values[15] = acceleratorPercent & 0xFF;
   values[14] = (acceleratorPercent >> 8) & 0xFF;
 
+  compass->read();
   int course = compass->getAzimuth();
   values[17] = (course & 0xFF);
   values[16] = (course >> 8) & 0xFF;

@@ -53,10 +53,15 @@ void Logger::flushBuffer() {
 }
 Logger::~Logger() {
   Serial.print(F("Log Ending"));
-  logFile.close();
+
+  // logFile.close();
 
   flushBuffer();
   Serial.println(F("\tLogger closed"));
+}
+
+void Logger::close() {
+  logFile.close();
 }
 
 void Logger::log(byte* message, int length) {
