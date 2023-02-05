@@ -582,7 +582,7 @@ uint8_t MPU6050::dmpProcessFIFOPacket(const unsigned char *dmpData) {
         Serial.print(" ");
     }
     Serial.print("\n");*/
-    //Serial.println((uint16_t)dmpPacketBuffer);
+    Serial.println((uint16_t)dmpPacketBuffer);
     return 0;
 }
 uint8_t MPU6050::dmpReadAndProcessFIFOPacket(uint8_t numPackets, uint8_t *processed) {

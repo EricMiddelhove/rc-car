@@ -26,9 +26,9 @@ Logger::Logger() {
     filename.concat(logcount);
     filename.concat(F(".b"));
 
-    // Serial.print(F("Checking file: "));
+    Serial.print(F("Checking file: "));
     Serial.print(filename);
-    // Serial.print(F("\n"));
+    Serial.print(F("\n"));
     delay(100);
 
     fileExists = SD.exists(filename);
@@ -37,7 +37,7 @@ Logger::Logger() {
   }
   delay(500);
   Logger::logFile = SD.open(filename, FILE_WRITE);
-  // Serial.println(F("Logger Initialized"));
+  Serial.println(F("Logger Initialized"));
 }
 
 void Logger::flushBuffer() {
@@ -45,19 +45,17 @@ void Logger::flushBuffer() {
     Logger::logFile.write((uint8_t*)buffer, bufferUsed);
     Logger::logFile.flush();
 
-    // Serial.print(F("\tBuffer forcefully flushed"));
+    Serial.print(F("\tBuffer forcefully flushed"));
 
     bufferIndex = 0;
     bufferUsed = 0;
   }
 }
 Logger::~Logger() {
-  // Serial.print(F("Log Ending"));
-
-  // logFile.close();
+  Serial.print(F("Log Ending"));
 
   flushBuffer();
-  // Serial.println(F("\tLogger closed"));
+  Serial.println(F("\tLogger closed"));
 }
 
 void Logger::close() {
