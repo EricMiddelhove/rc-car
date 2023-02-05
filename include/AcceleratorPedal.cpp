@@ -1,7 +1,7 @@
 
 #include "AcceleratorPedal.hpp"
 
-#include "Servo.h"
+#include "ESP32_Servo.h"
 
 int accSampleNumber = 0;
 int accSampleSum = 0;
@@ -23,7 +23,7 @@ void fallingAcceleratorPWMPulse() {
     manualAccelerationInputCounter++;
 
     if (manualAccelerationInputCounter > 5) {
-      Serial.println("Manual Accelerator Detected");
+      // Serial.println("Manual Accelerator Detected");
       acceleratorIsManual = true;
       manualAccelerationInputCounter = 0;
     }

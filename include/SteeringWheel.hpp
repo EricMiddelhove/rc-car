@@ -2,7 +2,7 @@
 #define SteeringWheel_hpp
 
 #include "Arduino.h"
-#include "Servo.h"
+#include "ESP32_Servo.h"
 
 void fallingSteeringPWMPulse();
 void risingSteeringPWMPulse();
@@ -16,6 +16,8 @@ const int RAW_STEERING_CENTER = 1472;
 const int STEERING_FULL_LEFT = 200;
 const int STEERING_FULL_RIGHT = 55;
 const int STEERING_CENTER = 90;
+
+const int MAXIMUM_SERVO_UPDATE_RATE_Hz = 10;
 
 int8_t STEERING_PWM_PIN_INPUT;
 int8_t STEERING_PWM_PIN_OUTPUT;
@@ -36,6 +38,7 @@ class SteeringWheel {
    *
    * @param percent
    */
+  void steer(int percent, bool force);
   void steer(int percent);
   int getSteeringPercent();
 

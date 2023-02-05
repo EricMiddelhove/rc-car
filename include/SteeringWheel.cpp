@@ -4,13 +4,16 @@
 #include "SteeringWheel.hpp"
 
 #include "Arduino.h"
-#include "Servo.h"
+#include "ESP32_Servo.h"
 
 int sampleNumber = 0;
 int sampleSum = 0;
 
 int manualSteeringInputCounter = 0;
 int steeringPulseCounter = 0;
+
+long millisLastSteered = 0;
+int minimumMillisBetweenSteering = 1000 / MAXIMUM_SERVO_UPDATE_RATE_Hz;
 
 void fallingSteeringPWMPulse() {
   steeringPulseCounter++;
@@ -26,7 +29,7 @@ void fallingSteeringPWMPulse() {
     manualSteeringInputCounter++;
 
     if (manualSteeringInputCounter > 5) {
-      Serial.println(F("Manual Steering Detected"));
+      // Serial.println(F("Manual Steering Detected"));
       steeringIsManual = true;
       manualSteeringInputCounter = 0;
     }
@@ -68,11 +71,21 @@ SteeringWheel::SteeringWheel(int pwmPinInput, int pwmPinOutput) {
   this->steer(0);
 }
 
-void SteeringWheel::steer(int percent) {
+void SteeringWheel::steer(int percent, bool force) {
   steeringPercent = percent;
+
+  if (millis() - millisLastSteered < 1000 / MAXIMUM_SERVO_UPDATE_RATE_Hz) {
+    return;
+  }
 
   int steeringPwmOutput = map(steeringPercent, -100, 100, RAW_STEERING_FULL_RIGHT, RAW_STEERING_FULL_LEFT);
   steeringServo.write(steeringPwmOutput);
+
+  millisLastSteered = millis();
+}
+
+void SteeringWheel::steer(int percent) {
+  steer(percent, false);
 }
 
 int SteeringWheel::getSteeringPercent() {

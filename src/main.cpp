@@ -2,8 +2,9 @@
 #include "Arduino.h"
 #include "CarState.cpp"
 // #include "Compass.cpp"
-#include "Gyroscope.cpp"
+// #include "Gyroscope.cpp"
 #include "Logger.cpp"
+#include "MPU6050_6Axis_MotionApps20.h"
 #include "QMC5883LCompass.h"
 #include "SPI.h"
 #include "SteeringWheel.cpp"
@@ -14,7 +15,7 @@ Logger* logger = NULL;
 
 SteeringWheel* steeringWheel = NULL;
 AcceleratorPedal* acceleratorPedal = NULL;
-Gyro* gyro = NULL;
+MPU6050* gyro = NULL;
 
 // Compass* compass = NULL;
 QMC5883LCompass compass;
@@ -25,34 +26,34 @@ void initialiseSensors() {
 
   SteeringWheel sw(2, 9);
   steeringWheel = &sw;
-  Serial.println(F("Steering Wheel Initialized"));
+  // Serial.println(F("Steering Wheel Initialized"));
 
   AcceleratorPedal ap(3, 10, 100);
   acceleratorPedal = &ap;
-  Serial.println(F("Accelerator Pedal Initialized"));
+  // Serial.println(F("Accelerator Pedal Initialized"));
 
-  Gyro gy;
+  MPU6050 gy;
   gyro = &gy;
-  gyro->wake();
-  Serial.println(F("Gyroscope Initialized"));
+
+  // Serial.println(F("Gyroscope Initialized"));
 
   // Compass c;
   // compass = &c;
   compass.setMode(0b01000000, 0b00010000, 0b00000100, 0b00000001);
   compass.setCalibration(-1205, 585, -1752, 45, -1626, 0);
-  Serial.println(F("Compass Initialized"));
+  // Serial.println(F("Compass Initialized"));
 }
 
 void emergencyTakeOver(CarState* carState) {
-  Serial.println("MANUAL OVERRIDE");
+  // Serial.println("MANUAL OVERRIDE");
 
   while (digitalRead(BUTTON_PIN) == 0) {
     int inputSteeringPercent = steeringWheel->getSteeringPercent();
     int inputAccelerationPercent = acceleratorPedal->getAcceleratorPercent();
 
-    Serial.print("Steering: ");
+    // Serial.print("Steering: ");
     Serial.print(inputSteeringPercent);
-    Serial.print(" Acceleration: ");
+    // Serial.print(" Acceleration: ");
     Serial.println(inputAccelerationPercent);
 
     steeringWheel->steer(inputSteeringPercent);
@@ -61,7 +62,7 @@ void emergencyTakeOver(CarState* carState) {
 }
 
 void emergencyShutdown() {
-  Serial.println("EMERGENCY SHUTDOWN");
+  // Serial.println("EMERGENCY SHUTDOWN");
 
   steeringWheel->steer(0);
   acceleratorPedal->accelerate(0);
@@ -136,10 +137,10 @@ void setup() {
     acceleratorPedal->accelerate(inputAccelerationPercent);
 
     if (steeringIsManual || acceleratorIsManual) {
-      Serial.print(F("Steering is Manual: "));
-      Serial.print(steeringIsManual);
-      Serial.print(F("\tAcceleration is Manual: "));
-      Serial.println(acceleratorIsManual);
+      // Serial.print(F("Steering is Manual: "));
+      // Serial.print(steeringIsManual);
+      // Serial.print(F("\tAcceleration is Manual: "));
+      // Serial.println(acceleratorIsManual);
       emergencyTakeOver(carState);
       break;
     }
@@ -148,17 +149,27 @@ void setup() {
     const int targetCourse = carState->getTargetCourse();
     const int currentCourse = carState->getLocalCourse();
 
-    Serial.print(F("Target Course: "));
-    Serial.print(targetCourse);
-    Serial.print(F("\tCurrent Course: "));
-    Serial.print(currentCourse);
+    int16_t ypr[3];
+    carState->getYawPitchRoll(ypr);
+
+    // Serial.print(F("Yaw: "));
+    // Serial.print(ypr[0]);
+    // Serial.print(F("\tPitch: "));
+    // Serial.print(ypr[1]);
+    // Serial.print(F("\tRoll: "));
+    // Serial.print(ypr[2]);
+
+    // Serial.print(F("Target Course: "));
+    // Serial.print(targetCourse);
+    // Serial.print(F("\tCurrent Course: "));
+    // Serial.print(currentCourse);
 
     int steeringPercent = calculateSteeringPercent(targetCourse, currentCourse, 10);
-    Serial.print(F("\tSteering Percent: "));
-    Serial.print(steeringPercent);
+    // Serial.print(F("\tSteering Percent: "));
+    // Serial.print(steeringPercent);
 
-    Serial.print(F("\tButton: "));
-    Serial.print(digitalRead(BUTTON_PIN));
+    // Serial.print(F("\tButton: "));
+    // Serial.print(digitalRead(BUTTON_PIN));
 
     logger->bufLog(carState->getValues(), CarState::VALUES_LENGTH);
     // logger->log(carState->getValues(), CarState::VALUES_LENGTH);
@@ -167,8 +178,8 @@ void setup() {
 
     uint16_t endTime = millis();
     uint16_t duration = endTime - startTime;
-    Serial.print(F("\tDuration: "));
-    Serial.print(duration);
+    // Serial.print(F("\tDuration: "));
+    // Serial.print(duration);
 
     Serial.println();
   }
@@ -183,14 +194,14 @@ void setup() {
 
   delay(1000);
 
-  Serial.println(F("Steering: Full Left"));
-  steeringWheel->steer(100);
+  // Serial.println(F("Steering: Full Left"));
+  steeringWheel->steer(100, true);
   delay(2000);
-  Serial.println(F("Steering: Full Right"));
-  steeringWheel->steer(-100);
+  // Serial.println(F("Steering: Full Right"));
+  steeringWheel->steer(-100, true);
   delay(2000);
-  Serial.println(F("Steering: Center"));
-  steeringWheel->steer(0);
+  // Serial.println(F("Steering: Center"));
+  steeringWheel->steer(0, true);
 
   pinMode(13, OUTPUT);
 

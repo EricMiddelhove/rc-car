@@ -116,7 +116,7 @@ void Gyro::configure() {
   Wire.requestFrom(MPU6050_ADRESS, 1, true);
   byte result = Wire.read();
 
-  Serial.print(F("Accel config: "));
+  // Serial.print(F("Accel config: "));
   Serial.println(result, BIN);
 
   return;

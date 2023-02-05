@@ -2,7 +2,7 @@
 #define AcceleratorPedal_hpp
 
 #include "Arduino.h"
-#include "Servo.h"
+#include "ESP32_Servo.h"
 
 void fallingAcceleratorPWMPulse();
 void risingAcceleratorPWMPulse();

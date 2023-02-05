@@ -1,19 +1,43 @@
 #include "CarState.hpp"
 
-#include "Gyroscope.hpp"
-
-CarState::CarState(Gyro* gyro, SteeringWheel* steeringwheel, AcceleratorPedal* acceleratorpedal, QMC5883LCompass* compass) {
-  this->gyro = gyro;
+CarState::CarState(MPU6050* mpu, SteeringWheel* steeringwheel, AcceleratorPedal* acceleratorpedal, QMC5883LCompass* compass) {
+  this->mpu = mpu;
   this->steeringwheel = steeringwheel;
   this->acceleratorpedal = acceleratorpedal;
   this->compass = compass;
 
   this->initialCourse = compass->getAzimuth();
 
-  // this->refresh();
+  this->configureMPU();
+
+  this->refresh();
 }
 
 CarState::CarState() {
+}
+
+void CarState::configureMPU() {
+  mpu->initialize();
+  devStatus = mpu->dmpInitialize();
+
+  // supply own gyro offsets here, scaled for min sensitivity
+  mpu->setXGyroOffset(220);
+  mpu->setYGyroOffset(76);
+  mpu->setZGyroOffset(-85);
+  mpu->setZAccelOffset(1788);
+
+  if (devStatus == 0) {
+    mpu->CalibrateAccel(6);
+    mpu->CalibrateGyro(6);
+    mpu->PrintActiveOffsets();
+
+    mpu->setDMPEnabled(true);
+    packetSize = mpu->dmpGetFIFOPacketSize();
+  } else {
+    Serial.print("MPU6050 DMP Initialization failed (code ");
+    Serial.print(devStatus);
+    Serial.println(")");
+  }
 }
 
 int CarState::getXAcc() {
@@ -81,9 +105,23 @@ void CarState::setTargetCourse(int course) {
   values[18] = (course >> 8) & 0xFF;
 }
 
+void CarState::getYawPitchRoll(int16_t* ypr) {
+  ypr[0] = (values[18] << 8 | values[19]);  // Yaw
+  ypr[1] = (values[20] << 8 | values[21]);  // Pitch
+  ypr[2] = (values[22] << 8 | values[23]);  // Roll
+}
+
 void CarState::refresh() {
-  gyro->getAccelerometerData(values);  // initialises 6 bytes
-  gyro->getGyroData(values + 6);       // initialises 6 bytes
+  // Serial.print("\tCarState::refresh()");
+  // gyro->getAccelerometerData(values);  // initialises 6 bytes
+  for (int i = 0; i < 6; i++) {  // Mocks accelerometer data
+    values[i] = values[i] & 0x00;
+  }
+
+  // gyro->getGyroData(values + 6);       // initialises 6 bytes
+  for (int i = 0; i < 6; i++) {  // Mocks gyro data
+    values[i] = values[i] & 0x00;
+  }
 
   int steeringPercent = steeringwheel->getSteeringPercent();
   values[13] = steeringPercent & 0xFF;
@@ -93,10 +131,31 @@ void CarState::refresh() {
   values[15] = acceleratorPercent & 0xFF;
   values[14] = (acceleratorPercent >> 8) & 0xFF;
 
-  compass->read();
-  int course = compass->getAzimuth();
+  // compass->read();
+  // int course = compass->getAzimuth();
+  int course = 0;
   values[17] = (course & 0xFF);
   values[16] = (course >> 8) & 0xFF;
+
+  float ypr[3];
+  mpu->dmpGetQuaternion(q, fifoBuffer);
+  mpu->dmpGetGravity(gravity, q);
+  mpu->dmpGetYawPitchRoll(ypr, q, gravity);
+
+  float yaw = ypr[0] * 180 / M_PI;
+  float pitch = ypr[1] * 180 / M_PI;
+  float roll = ypr[2] * 180 / M_PI;
+
+  Serial.print("\tCarState::refresh() - Yaw: ");
+  Serial.print(yaw);
+  values[19] = (int)yaw & 0xFF;
+  values[18] = ((int)yaw >> 8) & 0xFF;
+
+  values[21] = (int)pitch & 0xFF;
+  values[20] = ((int)pitch >> 8) & 0xFF;
+
+  values[23] = (int)roll & 0xFF;
+  values[22] = ((int)roll >> 8) & 0xFF;
 }
 
 byte* CarState::getValues() {
